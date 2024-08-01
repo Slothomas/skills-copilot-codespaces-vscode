@@ -1,4 +1,3 @@
-//create web server
 
 //create web server
 var express = require('express');
