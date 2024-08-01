@@ -1,35 +1,27 @@
-// CREATE WEB SERVER
+// create web server javascrpit file
+// Purpose: create comments web server
+// Creator: Austin
+// Date: 2020-11-27
 
-var express = require('express');
-var app = express();
-var fs = require('fs');
-var bodyParser = require('body-parser');
+// import module
+const express = require('express');
+const router = express.Router();
+const comments = require('../model/comments.js');
+const user = require('../model/user.js');
 
-// CONFIGURE SERVER
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// READ COMMENTS
-app.get('/comments', function(req, res) {
-  fs.readFile(__dirname + '/comments.json', function(err, data) {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(data);
-  });
+// get request
+router.get('/', async (req, res) => {
+    const comment = await comments.getComments();
+    res.send(comment);
 });
 
-// CREATE COMMENT
-app.post('/comments', function(req, res) {
-  fs.readFile(__dirname + '/comments.json', function(err, data) {
-    var comments = JSON.parse(data);
-    comments.push(req.body);
-    fs.writeFile(__dirname + '/comments.json', JSON.stringify(comments, null, 4), function(err) {
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(comments));
-    });
-  });
+// post request
+router.post('/', async (req, res) => {
+    const token = req.header('x-auth');
+    const user_id = await user.getUserID(token);
+    const comment = await comments.addComment(req.body.comment, user_id);
+    res.send(comment);
 });
 
-// START SERVER
-app.listen(3000, function() {
-  console.log('Server is running on http://localhost:3000');
-});
+// export module
+module.exports = router;
