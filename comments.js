@@ -1,25 +1,35 @@
 // CREATE WEB SERVER
 
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const comments = require('./comments');
+var express = require('express');
+var app = express();
+var fs = require('fs');
+var bodyParser = require('body-parser');
 
-app.use(cors());
+// CONFIGURE SERVER
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/comments', (req, res) => {
-  res.json(comments);
+// READ COMMENTS
+app.get('/comments', function(req, res) {
+  fs.readFile(__dirname + '/comments.json', function(err, data) {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(data);
+  });
 });
 
-app.post('/comments', (req, res) => {
-  const comment = req.body;
-  comments.push(comment);
-  res.json(comment);
+// CREATE COMMENT
+app.post('/comments', function(req, res) {
+  fs.readFile(__dirname + '/comments.json', function(err, data) {
+    var comments = JSON.parse(data);
+    comments.push(req.body);
+    fs.writeFile(__dirname + '/comments.json', JSON.stringify(comments, null, 4), function(err) {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(comments));
+    });
+  });
 });
 
-app.listen(3001, () => {
-  console.log('Server listening on port 3001');
+// START SERVER
+app.listen(3000, function() {
+  console.log('Server is running on http://localhost:3000');
 });
