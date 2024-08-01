@@ -1,27 +1,26 @@
-// create web server javascrpit file
-// Purpose: create comments web server
-// Creator: Austin
-// Date: 2020-11-27
+//create web server
+const http = require('http');
+const fs = require('fs');
 
-// import module
-const express = require('express');
-const router = express.Router();
-const comments = require('../model/comments.js');
-const user = require('../model/user.js');
-
-// get request
-router.get('/', async (req, res) => {
-    const comment = await comments.getComments();
-    res.send(comment);
+const server = http.createServer((req, res) => {
+    if (req.url === '/') {
+        fs.readFile(`${__dirname}/public/index.html`, (err, data) => {
+            if (err) throw err;
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data);
+        });
+    } else if (req.url === '/comments') {
+        fs.readFile(`${__dirname}/public/comments.json`, (err, data) => {
+            if (err) throw err;
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(data);
+        });
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<h1>Not Found</h1>');
+    }
 });
 
-// post request
-router.post('/', async (req, res) => {
-    const token = req.header('x-auth');
-    const user_id = await user.getUserID(token);
-    const comment = await comments.addComment(req.body.comment, user_id);
-    res.send(comment);
+server.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
 });
-
-// export module
-module.exports = router;
