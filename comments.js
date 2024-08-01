@@ -1,27 +1,25 @@
+// CREATE WEB SERVER
 
-//create web server
-var express = require('express');
-var app = express();
-var fs = require('fs');
-var bodyParser = require('body-parser');
-var comments = require('./comments.json');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const comments = require('./comments');
 
-app.use(express.static('public'));
+app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/comments', function(req, res){
-    res.json(comments);
+app.get('/comments', (req, res) => {
+  res.json(comments);
 });
 
-app.post('/comments', function(req, res){
-    comments.push(req.body);
-    fs.writeFile('comments.json', JSON.stringify(comments, null, 4), function(err){
-        console.log(err);
-    });
-    res.json(comments);
+app.post('/comments', (req, res) => {
+  const comment = req.body;
+  comments.push(comment);
+  res.json(comment);
 });
 
-app.listen(3000, function(){
-    console.log('Server started on port 3000');
+app.listen(3001, () => {
+  console.log('Server listening on port 3001');
 });
